@@ -21,8 +21,10 @@ import { Loader } from "@/components/loader";
 import { UserAvatar } from "@/components/user-avatar";
 import { BotAvatar } from "@/components/bot-avatar";
 import { cn } from "@/lib/utils";
+import { useProModal } from "@/hooks/use-pro-modal";
 
 const CodePage = () => {
+	const proModal = useProModal();
 	const router = useRouter();
 	const [messages, setMessages] = useState<ChatCompletionRequestMessage[]>([]);
 
@@ -50,6 +52,9 @@ const CodePage = () => {
 			setMessages((current) => [...current, userMessage, response.data]);
 			form.reset();
 		} catch (error: any) {
+			if (error?.response?.status === 403) {
+				proModal.onOpen();
+			}
 			console.log(error);
 		} finally {
 			router.refresh();
@@ -115,25 +120,28 @@ const CodePage = () => {
 									"p-8 w-full flex items-start gap-x-8 rounded-lg",
 									message.role === "user"
 										? "bg-white border border-black/10"
-										: "bg-muted"
+										: "bg-muted",
 								)}
 							>
 								{message.role === "user" ? <UserAvatar /> : <BotAvatar />}
 
 								<ReactMarkdown
 									components={{
-										pre: ({node, ...props}) => (
+										pre: ({ node, ...props }) => (
 											<div className="overflow-auto w-full my-2 bg-black/10 p-2 rounded-lg">
-											<pre {...props} />
+												<pre {...props} />
 											</div>
 										),
-										code:({node, ...props}) => (
-											<code className="bg-black/10 p-1 rounded-lg" {...props}/>
-										)
+										code: ({ node, ...props }) => (
+											<code
+												className="bg-black/10 p-1 rounded-lg"
+												{...props}
+											/>
+										),
 									}}
 									className="text-sm overflow-hidden leading-7"
 								>
-									{message.content || ""	}
+									{message.content || ""}
 								</ReactMarkdown>
 							</div>
 						))}

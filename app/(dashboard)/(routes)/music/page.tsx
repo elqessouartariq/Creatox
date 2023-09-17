@@ -3,7 +3,7 @@
 import * as z from "zod";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import {  Music } from "lucide-react";
+import { Music } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -16,9 +16,10 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Empty } from "@/components/empty";
 import { Loader } from "@/components/loader";
-
+import { useProModal } from "@/hooks/use-pro-modal";
 
 const MusicPage = () => {
+	const proModal = useProModal();
 	const router = useRouter();
 	const [music, setMusic] = useState<string>();
 	const form = useForm<z.infer<typeof formSchema>>({
@@ -35,6 +36,9 @@ const MusicPage = () => {
 			setMusic(response.data.audio);
 			form.reset();
 		} catch (error: any) {
+			if (error?.response?.status === 403) {
+				proModal.onOpen();
+			}
 			console.log(error);
 		} finally {
 			router.refresh();

@@ -16,9 +16,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Empty } from "@/components/empty";
 import { Loader } from "@/components/loader";
-import { UserAvatar } from "@/components/user-avatar";
-import { BotAvatar } from "@/components/bot-avatar";
-import { cn } from "@/lib/utils";
+
 import {
 	Select,
 	SelectContent,
@@ -28,8 +26,10 @@ import {
 } from "@/components/ui/select";
 import { Card, CardFooter } from "@/components/ui/card";
 import Image from "next/image";
+import { useProModal } from "@/hooks/use-pro-modal";
 
 const ImagePage = () => {
+	const proModal = useProModal();
 	const router = useRouter();
 	const [images, setImages] = useState<string[]>([]);
 
@@ -51,6 +51,9 @@ const ImagePage = () => {
 			setImages(urls);
 			form.reset();
 		} catch (error: any) {
+			if (error?.response?.status === 403) {
+				proModal.onOpen();
+			}
 			console.log(error);
 		} finally {
 			router.refresh();
@@ -101,11 +104,7 @@ const ImagePage = () => {
 										>
 											<FormControl>
 												<SelectTrigger>
-													<SelectValue
-														defaultValue={
-															field.value
-														}
-													/>
+													<SelectValue defaultValue={field.value} />
 												</SelectTrigger>
 											</FormControl>
 											<SelectContent>
@@ -135,24 +134,18 @@ const ImagePage = () => {
 										>
 											<FormControl>
 												<SelectTrigger>
-													<SelectValue
-														defaultValue={
-															field.value
-														}
-													/>
+													<SelectValue defaultValue={field.value} />
 												</SelectTrigger>
 											</FormControl>
 											<SelectContent>
-												{resolutionOptions.map(
-													(option) => (
-														<SelectItem
-															key={option.value}
-															value={option.value}
-														>
-															{option.label}
-														</SelectItem>
-													)
-												)}
+												{resolutionOptions.map((option) => (
+													<SelectItem
+														key={option.value}
+														value={option.value}
+													>
+														{option.label}
+													</SelectItem>
+												))}
 											</SelectContent>
 										</Select>
 									</FormItem>
@@ -185,7 +178,11 @@ const ImagePage = () => {
 								className="rounded-lg overflow-hidden"
 							>
 								<div className="relative aspect-square">
-									<Image fill alt="Generated" src={src} />
+									<Image
+										fill
+										alt="Generated"
+										src={src}
+									/>
 								</div>
 								<CardFooter className="p-2">
 									<Button

@@ -20,8 +20,10 @@ import { Loader } from "@/components/loader";
 import { UserAvatar } from "@/components/user-avatar";
 import { BotAvatar } from "@/components/bot-avatar";
 import { cn } from "@/lib/utils";
+import { useProModal } from "@/hooks/use-pro-modal";
 
 const ConversationPage = () => {
+	const proModal = useProModal();
 	const router = useRouter();
 	const [messages, setMessages] = useState<ChatCompletionRequestMessage[]>([]);
 
@@ -49,6 +51,9 @@ const ConversationPage = () => {
 			setMessages((current) => [...current, userMessage, response.data]);
 			form.reset();
 		} catch (error: any) {
+			if (error?.response?.status === 403) {
+				proModal.onOpen();
+			}
 			console.log(error);
 		} finally {
 			router.refresh();
@@ -114,7 +119,7 @@ const ConversationPage = () => {
 									"p-8 w-full flex items-start gap-x-8 rounded-lg",
 									message.role === "user"
 										? "bg-white border border-black/10"
-										: "bg-muted"
+										: "bg-muted",
 								)}
 							>
 								{message.role === "user" ? <UserAvatar /> : <BotAvatar />}
